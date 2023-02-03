@@ -1,0 +1,36 @@
+from flask import Flask, request
+import json
+
+app = Flask(__name__)
+
+clients = {}
+
+@app.route("/add_client", methods=["POST"])
+def add_client():
+    request_data = request.get_json()
+    client_id = request_data["client_id"]
+    client_name = request_data["client_name"]
+    clients[client_id] = {"name": client_name, "balance": 0}
+    return json.dumps({"status": "success", "message": "Client added"})
+
+@app.route("/get_client_balance", methods=["GET"])
+def get_client_balance():
+    client_id = request.args.get("client_id")
+    if client_id in clients:
+        return json.dumps({"status": "success", "balance": clients[client_id]["balance"]})
+    else:
+        return json.dumps({"status": "failure", "message": "Client not found"})
+
+@app.route("/update_client_balance", methods=["POST"])
+def update_client_balance():
+    request_data = request.get_json()
+    client_id = request_data["client_id"]
+    new_balance = request_data["new_balance"]
+    if client_id in clients:
+        clients[client_id]["balance"] = new_balance
+        return json.dumps({"status": "success", "message": "Balance updated"})
+    else:
+        return json.dumps({"status": "failure", "message": "Client not found"})
+
+if __name__ == '__main__':
+    app.run(debug=True)
